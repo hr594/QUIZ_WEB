@@ -14,47 +14,66 @@ export async function getBootcamps(): Promise<Bootcamp[]> {
   return (data || []) as Bootcamp[];
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // ── Get bootcamp by ID ────────────────────────────────────────
 export async function getBootcampById(id: string): Promise<Bootcamp | null> {
-  const { data, error } = await supabase
-    .from('bootcamps')
-    .select(`*, domain:domains(name, slug, icon, color)`)
-    .eq('id', id)
-    .maybeSingle();
+  if (!id || !UUID_REGEX.test(id)) return null;
+  try {
+    const { data, error } = await supabase
+      .from('bootcamps')
+      .select(`*, domain:domains(name, slug, icon, color)`)
+      .eq('id', id)
+      .maybeSingle();
 
-  if (error) throw error;
-  return data as Bootcamp | null;
+    if (error) return null;
+    return data as Bootcamp | null;
+  } catch {
+    return null;
+  }
 }
 
 // ── Get bootcamp by slug ──────────────────────────────────────
 export async function getBootcampBySlug(slug: string): Promise<Bootcamp | null> {
-  const { data, error } = await supabase
-    .from('bootcamps')
-    .select(`*, domain:domains(name, slug, icon, color)`)
-    .eq('slug', slug)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabase
+      .from('bootcamps')
+      .select(`*, domain:domains(name, slug, icon, color)`)
+      .eq('slug', slug)
+      .maybeSingle();
 
-  if (error) throw error;
-  return data as Bootcamp | null;
+    if (error) return null;
+    return data as Bootcamp | null;
+  } catch {
+    return null;
+  }
 }
 
 // ── Get bootcamp for a domain (used in result page CTA) ──────
-export async function getBootcampForDomain(domainId: string): Promise<Bootcamp | null> {
-  const { data, error } = await supabase
-    .from('bootcamps')
-    .select(`*, domain:domains(name, slug, icon, color)`)
-    .eq('domain_id', domainId)
-    .eq('active', true)
-    .in('status', ['upcoming', 'live'])
-    .order('start_date', { ascending: true })
-    .limit(1)
-    .maybeSingle();
+export async function getBootcampForDomain(domainId?: string): Promise<Bootcamp | null> {
+  const isValidUuid = domainId && UUID_REGEX.test(domainId);
 
-  if (error) throw error;
+  if (isValidUuid) {
+    try {
+      const { data, error } = await supabase
+        .from('bootcamps')
+        .select(`*, domain:domains(name, slug, icon, color)`)
+        .eq('domain_id', domainId)
+        .eq('active', true)
+        .in('status', ['upcoming', 'live'])
+        .order('start_date', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && data) {
+        return data as Bootcamp;
+      }
+    } catch {}
+  }
 
   // Fallback: get any upcoming bootcamp
-  if (!data) {
-    const { data: fallback } = await supabase
+  try {
+    const { data: fallback, error: fallbackError } = await supabase
       .from('bootcamps')
       .select(`*, domain:domains(name, slug, icon, color)`)
       .eq('active', true)
@@ -62,10 +81,12 @@ export async function getBootcampForDomain(domainId: string): Promise<Bootcamp |
       .order('start_date', { ascending: true })
       .limit(1)
       .maybeSingle();
-    return fallback as Bootcamp | null;
-  }
 
-  return data as Bootcamp | null;
+    if (fallbackError) return null;
+    return fallback as Bootcamp | null;
+  } catch {
+    return null;
+  }
 }
 
 // ── Register for a bootcamp ───────────────────────────────────

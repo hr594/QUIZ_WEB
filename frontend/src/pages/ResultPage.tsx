@@ -79,7 +79,7 @@ export default function ResultPage() {
     (stateResult as any)?.domain?.id ||
     (result as any)?.domain_id ||
     (result as any)?.domain?.id ||
-    'dev-domain';
+    '';
 
   const targetStudentId =
     (location.state as any)?.studentId ||

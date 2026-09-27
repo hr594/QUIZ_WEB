@@ -50,7 +50,12 @@ function App() {
   return (
     <AuthContext.Provider value={authState}>
       <ErrorBoundary>
-        <BrowserRouter>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <Routes>
             {/* Admin Login & Aliases */}
             <Route path="/admin/login" element={<AdminLoginPage />} />
