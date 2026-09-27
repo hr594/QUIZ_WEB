@@ -2,6 +2,10 @@
 // Automatically discovers local network IP when accessed from mobile devices on the same Wi-Fi
 
 export function getBackendUrl(): string {
+  if (import.meta.env.VITE_BACKEND_URL) {
+    return import.meta.env.VITE_BACKEND_URL as string;
+  }
+
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
     // If accessing via localhost or private LAN IP (e.g., 192.168.x.x from mobile phone)
@@ -15,5 +19,5 @@ export function getBackendUrl(): string {
       return `http://${host}:5000`;
     }
   }
-  return (import.meta.env.VITE_BACKEND_URL as string) || 'http://localhost:5000';
+  return 'https://quiz-web-8fkf.onrender.com';
 }
