@@ -402,8 +402,11 @@ export default function ResultPage() {
   };
 
   const isWebinarLive = hasJoinedWebinar || schedule.isLiveNow;
-  const mins = Math.max(0, Math.floor(schedule.secondsRemaining / 60));
-  const secs = Math.max(0, schedule.secondsRemaining % 60);
+  const totalSecs = Math.max(0, schedule.secondsRemaining);
+  const hours = Math.floor(totalSecs / 3600);
+  const mins = Math.floor((totalSecs % 3600) / 60);
+  const secs = totalSecs % 60;
+  const formattedHours = String(hours).padStart(2, '0');
   const formattedMins = String(mins).padStart(2, '0');
   const formattedSecs = String(secs).padStart(2, '0');
 
@@ -488,7 +491,9 @@ export default function ResultPage() {
               <p className="text-slate-200/90 text-[10px] sm:text-xs max-w-lg font-normal leading-relaxed">
                 {isWebinarLive
                   ? `The webinar is LIVE now! Join MNC experts to learn insights and receive your quiz results.`
-                  : `Webinar starts in ${schedule.minsRemaining} minutes. Join MNC experts to learn insights and receive your quiz results.`
+                  : hours > 0
+                    ? `Webinar starts in ${hours} hr${hours > 1 ? 's' : ''} ${mins} mins. Join MNC experts to learn insights and receive your quiz results.`
+                    : `Webinar starts in ${mins} minute${mins !== 1 ? 's' : ''}. Join MNC experts to learn insights and receive your quiz results.`
                 }
               </p>
 
@@ -529,7 +534,7 @@ export default function ResultPage() {
                     </div>
                   </a>
                 ) : (
-                  /* Dual Digital Countdown Timer Pod flanked by cyan waves */
+                  /* Digital Countdown Timer Pod flanked by cyan waves */
                   <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                     {/* Left cyan wave arcs */}
                     <svg className="w-3 h-7 sm:w-3.5 sm:h-8 text-cyan-400/90 shrink-0" viewBox="0 0 14 30" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -544,8 +549,20 @@ export default function ResultPage() {
                         <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300" />
                       </div>
 
+                      {/* Hours Digits Card (when > 0) */}
+                      {hours > 0 && (
+                        <div className="bg-[#0B1E48] rounded-xl px-2 sm:px-2.5 py-0.5 sm:py-1 flex flex-col items-center justify-center min-w-[42px] sm:min-w-[48px] border border-blue-900/60 shadow-inner">
+                          <span className="text-base sm:text-lg font-black font-mono text-white leading-tight">
+                            {formattedHours}
+                          </span>
+                          <span className="text-[7.5px] sm:text-[8px] font-bold text-slate-300 tracking-wider">
+                            HOURS
+                          </span>
+                        </div>
+                      )}
+
                       {/* Minutes Digits Card */}
-                      <div className="bg-[#0B1E48] rounded-xl px-2 sm:px-2.5 py-0.5 sm:py-1 flex flex-col items-center justify-center min-w-[46px] sm:min-w-[52px] border border-blue-900/60 shadow-inner">
+                      <div className="bg-[#0B1E48] rounded-xl px-2 sm:px-2.5 py-0.5 sm:py-1 flex flex-col items-center justify-center min-w-[42px] sm:min-w-[48px] border border-blue-900/60 shadow-inner">
                         <span className="text-base sm:text-lg font-black font-mono text-white leading-tight">
                           {formattedMins}
                         </span>
@@ -555,7 +572,7 @@ export default function ResultPage() {
                       </div>
 
                       {/* Seconds Digits Card */}
-                      <div className="bg-[#0B1E48] rounded-xl px-2 sm:px-2.5 py-0.5 sm:py-1 flex flex-col items-center justify-center min-w-[46px] sm:min-w-[52px] border border-blue-900/60 shadow-inner">
+                      <div className="bg-[#0B1E48] rounded-xl px-2 sm:px-2.5 py-0.5 sm:py-1 flex flex-col items-center justify-center min-w-[42px] sm:min-w-[48px] border border-blue-900/60 shadow-inner">
                         <span className="text-base sm:text-lg font-black font-mono text-white leading-tight">
                           {formattedSecs}
                         </span>
